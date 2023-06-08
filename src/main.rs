@@ -12,12 +12,15 @@ fn main() {
     let listener = TcpListener::bind(address).unwrap();
     let pool = ThreadPool::new(4);
 
-    for stream in listener.incoming() {
+    // The limit of two requests below is to demo graceful shutdown
+    for stream in listener.incoming().take(2) {
         let stream = stream.unwrap();
         pool.execute(|| {
             handle_connection(stream);
         });
     }
+
+    println!("shutting down");
 }
 
 fn handle_connection(mut stream: TcpStream) {
